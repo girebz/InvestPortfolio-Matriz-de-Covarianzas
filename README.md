@@ -1,4 +1,4 @@
-# Portfolio Management Shiny App
+# Portfolio Management: Covariance Matrix Analysis
 
 ## Overview
 
@@ -21,3 +21,28 @@ Welcome to the Portfolio Management Shiny App repository! This project provides 
 ### 📈 Interactive Visualizations
 - **Historical price charts** for selected tickers over specified date ranges.
 - **Dynamic portfolio tables** to track and manage your investments with ease.
+
+
+# Gestión de Portafolio: Análisis de la Matriz de Covarianzas
+
+## Resumen
+
+¡Bienvenido al repositorio de la Aplicación Shiny para Gestión de Portafolios! Este proyecto proporciona una aplicación poderosa y fácil de usar diseñada para ayudar a los inversores a gestionar sus portafolios optimizando la diversificación y minimizando el riesgo a través del análisis avanzado de la matriz de covarianzas.
+
+## Características
+
+### 📊 Análisis de la Matriz de Covarianzas
+- **Calcular y visualizar matrices de covarianzas** para entender las relaciones entre diferentes activos en tu portafolio.
+- **Cálculo de autovalores y autovectores** para identificar componentes principales y optimizar la asignación de activos.
+
+### 💡 Propuestas de Inversión
+- **Generar propuestas de inversión** basadas en el análisis de componentes principales para asegurar portafolios diversificados y optimizados en cuanto a riesgo.
+- **Entrada de cantidad de inversión personalizable** para ajustar las propuestas a tu situación financiera específica.
+
+### 🔍 Integración de Datos Completa
+- **Obtener datos en tiempo real** para acciones, ETFs y criptomonedas.
+- **Métricas financieras detalladas** incluyendo relación PE, rendimiento de dividendos, beta y más.
+
+### 📈 Visualizaciones Interactivas
+- **Gráficos de precios históricos** para los tickers seleccionados en rangos de fechas especificados.
+- **Tablas dinámicas de portafolios** para rastrear y gestionar tus inversiones con facilidad.
