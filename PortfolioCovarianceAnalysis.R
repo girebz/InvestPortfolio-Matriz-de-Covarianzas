@@ -295,6 +295,13 @@ known_stocks <- c("TM","GOLD", "ASML","AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "
                     return(investment_allocation)
                   }
                   
+                  # Función para calcular la varianza del portafolio
+                  calculate_portfolio_variance <- function(portfolio, cov_matrix) {
+                    weights <- portfolio$Acciones * portfolio$Precio / sum(portfolio$Acciones * portfolio$Precio)
+                    portfolio_variance <- sum(weights %*% t(weights) * cov_matrix)
+                    return(portfolio_variance)
+                  }
+                  
                   # Definir la UI de la aplicación
                   ui <- fluidPage(
                     titlePanel("Gestión de Portafolio: Análisis de la Matriz de Covarianzas"),
@@ -328,7 +335,8 @@ known_stocks <- c("TM","GOLD", "ASML","AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "
                         actionButton("calculate_cov_button", "Calcular Matriz de Covarianza"),
                         actionButton("calculate_eigen_button", "Calcular Autovalores y Autovectores"),
                         numericInput("investment_amount", "Cantidad a Invertir:", value = 1000),
-                        actionButton("generate_proposal_button", "Generar Propuesta de Inversión")
+                        actionButton("generate_proposal_button", "Generar Propuesta de Inversión"),
+                        actionButton("evolution_button", "Evolución de Cartera")
                       ),
                       
                       mainPanel(
@@ -337,7 +345,9 @@ known_stocks <- c("TM","GOLD", "ASML","AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "
                         plotOutput("price_plot"),
                         tableOutput("cov_matrix"),
                         tableOutput("eigen_table"),
-                        tableOutput("investment_proposal")
+                        tableOutput("investment_proposal"),
+                        tableOutput("portfolio_evolution"),
+                        tableOutput("portfolio_variance_comparison")
                       )
                     )
                   )
@@ -484,9 +494,44 @@ known_stocks <- c("TM","GOLD", "ASML","AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "
                       cov_matrix <- calculate_cov_matrix(input$selected_tickers, start_date, end_date)
                       if (!is.null(cov_matrix)) {
                         investment_allocation <- generate_investment_proposal(cov_matrix, input$investment_amount)
-                        proposal_df <- data.frame(Ticker = input$selected_tickers, Allocation = investment_allocation)
+                        current_investment <- portfolio() %>%
+                          filter(Ticker %in% input$selected_tickers) %>%
+                          mutate(Current_USD = Acciones * Precio)
+                        
+                        proposal_df <- data.frame(
+                          Ticker = input$selected_tickers, 
+                          Propuesta_de_Inversión_USD = investment_allocation,
+                          Inversión_Actual_USD = current_investment$Current_USD,
+                          Inversión_Final_USD = current_investment$Current_USD + investment_allocation
+                        )
                         output$investment_proposal <- renderTable({
                           proposal_df
+                        })
+                      }
+                    })
+                    
+                    # Calcular y mostrar la evolución de la cartera
+                    observeEvent(input$evolution_button, {
+                      req(input$selected_tickers)
+                      req(input$date_range)
+                      req(input$investment_amount)
+                      start_date <- input$date_range[1]
+                      end_date <- input$date_range[2]
+                      cov_matrix <- calculate_cov_matrix(input$selected_tickers, start_date, end_date)
+                      if (!is.null(cov_matrix)) {
+                        initial_variance <- calculate_portfolio_variance(portfolio(), cov_matrix)
+                        investment_allocation <- generate_investment_proposal(cov_matrix, input$investment_amount)
+                        final_portfolio <- portfolio()
+                        final_portfolio$Acciones[final_portfolio$Ticker %in% input$selected_tickers] <- 
+                          final_portfolio$Acciones[final_portfolio$Ticker %in% input$selected_tickers] + 
+                          investment_allocation / final_portfolio$Precio[final_portfolio$Ticker %in% input$selected_tickers]
+                        final_variance <- calculate_portfolio_variance(final_portfolio, cov_matrix)
+                        variance_comparison <- data.frame(
+                          Estado = c("Inicial", "Final", "Diferencia"),
+                          Varianza = c(initial_variance, final_variance, final_variance - initial_variance)
+                        )
+                        output$portfolio_variance_comparison <- renderTable({
+                          variance_comparison
                         })
                       }
                     })
@@ -494,3 +539,4 @@ known_stocks <- c("TM","GOLD", "ASML","AAPL", "GOOGL", "MSFT", "AMZN", "TSLA", "
                   
                   # Ejecutar la aplicación
                   shinyApp(ui = ui, server = server)
+                  
